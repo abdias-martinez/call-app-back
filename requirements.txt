@@ -1,0 +1,6 @@
+Flask
+Flask-Cors
+jwt
+mysql
+mysql-connector-python
+mysqlclient
