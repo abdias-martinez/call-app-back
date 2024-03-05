@@ -9,11 +9,11 @@ DB_CONFIG = {
 TB_NAMES = {
     'users': {
         'name': 'Usuarios',
-        'public': False
+        'accessed_by': ['administrador']
     },
     'events': {
         'name': 'Eventos',
-        'public': False
+        'accessed_by': ['administrador', 'operador']
     },
 }
 
@@ -27,5 +27,5 @@ USER_ROLES = {
 }
 
 SECRET_KEY_CONFIG = {
-    'jwt_secret_key': '.`l]CAeA=ej|Q&Z:D{*CB}+,<;u8=d_$YUdaRYGe?Ld^_;?Pi1|q}a~>YN+bT^3'
+    'token_secret_key': '.`l]CAeA=ej|Q&Z:D{*CB}+,<;u8=d_$YUdaRYGe?Ld^_;?Pi1|q}a~>YN+bT^3'
 }
