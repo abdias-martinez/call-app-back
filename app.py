@@ -12,7 +12,7 @@ cors = CORS(app)
 def login():
     try:
         # conexión a la base de datos
-        connection = mysql.connector.connect(**DB_CONFIG)
+        connection = mysql.connector.connect(**DB_CONFIG[0])
         print("Conexion exitosa")
 
         try:
@@ -49,7 +49,7 @@ def login():
 def insertRecordTable(view, token):
     try:
         # conexión a la base de datos
-        connection = mysql.connector.connect(**DB_CONFIG)
+        connection = mysql.connector.connect(**DB_CONFIG[0])
         print("Conexion exitosa")
 
         # verificamos si el usuario cuenta con autenticación
@@ -76,7 +76,7 @@ def insertRecordTable(view, token):
 def obtainRecordsTable(view, token):
     try:
         # conexión a la base de datos
-        connection = mysql.connector.connect(**DB_CONFIG)
+        connection = mysql.connector.connect(**DB_CONFIG[0])
 
         print(f"token: {token}")
 
@@ -104,12 +104,14 @@ def obtainRecordsTable(view, token):
 @app.route("/dashboard/home/<token>", methods=["GET"])
 def obtainAllTablesRecords(token):
     try:
-        # conexión a la base de datos
-        connection = mysql.connector.connect(**DB_CONFIG)
-        if token != "" and user_is_authenticated(token, connection, SECRET_KEY_CONFIG['token_secret_key']):
+        # conexión a la primera base de datos 
+        connection_1 = mysql.connector.connect(**DB_CONFIG[0])
+        # conexión a la segunda base de datos 
+        connection_2 = mysql.connector.connect(**DB_CONFIG[1])
+        if token != "" and user_is_authenticated(token, connection_1, SECRET_KEY_CONFIG['token_secret_key']):
             try:
                 # Obtenemos los registros de todas las tablas
-                data = get_all_tables_records(token, connection, SECRET_KEY_CONFIG['token_secret_key'])
+                data = get_all_tables_records(token, connection_1, connection_2, SECRET_KEY_CONFIG['token_secret_key'])
                 return jsonify(data)
 
             except Exception as e:
@@ -127,7 +129,7 @@ def obtainAllTablesRecords(token):
 def updateRecordTable(view, token):
     try:
         # conexión a la base de datos
-        connection = mysql.connector.connect(**DB_CONFIG)
+        connection = mysql.connector.connect(**DB_CONFIG[0])
         print("Conexion exitosa")
 
         # verificamos si el usuario cuenta con autenticación
@@ -156,7 +158,7 @@ def updateRecordTable(view, token):
 def deleteRecordTable(view, token):
     try:
         # conexión a la base de datos
-        connection = mysql.connector.connect(**DB_CONFIG)
+        connection = mysql.connector.connect(**DB_CONFIG[0])
         print("Conexion exitosa")
 
         # verificamos si el usuario cuenta con autenticación
