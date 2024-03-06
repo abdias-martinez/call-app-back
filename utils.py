@@ -95,98 +95,79 @@ def get_records_table(token: str, connection: mysql.connector.connection.MySQLCo
 
 # función para obtener registros de todas las tablas
 def get_all_tables_records(token: str, connection_1: mysql.connector.connection.MySQLConnection, connection_2: mysql.connector.connection.MySQLConnection, secret_key: str) -> str:
-    try:
-        # Conexión 1
-        cursor_1 = connection_1.cursor(dictionary=True)
-        cursor_1.execute("SHOW TABLES")
+    decoded_token = jwt.decode(token, secret_key, algorithms='HS256')
+    user_rol = decoded_token["user_rol"]
+    all_tables_data = {}
+    
+    # Conexión 1
+    cursor_1 = connection_1.cursor(dictionary=True)
+    cursor_1.execute("SHOW TABLES")
+    db_name_1 = 'CAE'
+    tables_1 = [table['Tables_in_' + db_name_1] for table in cursor_1.fetchall()]
+    
+    # eliminamos las tablas para las que el usuario no tiene permisos
+    for tb in DB_INFO[db_name_1].values():
+        if user_rol not in tb['accessed_by']:
+            tables_1.remove(tb['name'])
+            
+    db_data_1 = {}
+    
+    for table_name in tables_1:
+        cursor_1.execute(f"SHOW COLUMNS FROM {table_name}")
+        columns_info = cursor_1.fetchall()
+        columns = [column['Field'] for column in columns_info]
+        columns_except_id = [column for column in columns if column.lower() != 'id']
+        columns_str = ', '.join(columns_except_id)
+        sql_query = f"SELECT {columns_str} FROM {table_name}"
+        cursor_1.execute(sql_query)
+        records = cursor_1.fetchall()
+        # formateamos los registros antes de agregarlos al resultado final
+        formatted_records = [{key: format_datetime(value) for key, value in record.items()} for record in records]
+        table_data = {
+            "table_name": table_name,
+            "records": formatted_records
+        }
+        db_data_1[table_name] = table_data
         
-        decoded_token = jwt.decode(token, secret_key, algorithms='HS256')
-        user_rol = decoded_token["user_rol"]
-
-        tables_1 = [table['Tables_in_CAE'] for table in cursor_1.fetchall()]
-
-        # eliminamos las tablas para las que el usuario no tiene permisos
-        for tb in DB_INFO['CAE'].values():
-            if user_rol not in tb['accessed_by']:
-                tables_1.remove(tb['name'])
-
-        all_tables_data_1 = {}
-
-        for table_name in tables_1:
-            cursor_1.execute(f"SHOW COLUMNS FROM {table_name}")
-            columns_info = cursor_1.fetchall()
-            columns = [column['Field'] for column in columns_info]
-
-            columns_except_id = [column for column in columns if column.lower() != 'id']
-            columns_str = ', '.join(columns_except_id)
-
-            sql_query = f"SELECT {columns_str} FROM {table_name}"
-            cursor_1.execute(sql_query)
-
-            records = cursor_1.fetchall()
-
-            # formateamos los registros antes de agregarlos al resultado final
-            formatted_records = [{key: format_datetime(value) for key, value in record.items()} for record in records]
-
-            table_data = {
-                "table_name": table_name,
-                "records": formatted_records
-            }
-
-            all_tables_data_1[table_name] = table_data
-
-        # Conexión 2
-        cursor_2 = connection_2.cursor(dictionary=True)
-        cursor_2.execute("SHOW TABLES")
-
-        tables_2 = [table['Tables_in_POSTES'] for table in cursor_2.fetchall()]
+    all_tables_data[db_name_1] = db_data_1
+    
+    # Conexión 2
+    cursor_2 = connection_2.cursor(dictionary=True)
+    cursor_2.execute("SHOW TABLES")
+    db_name_2 = 'POSTES'
+    tables_2 = [table['Tables_in_' + db_name_2] for table in cursor_2.fetchall()]
+    
+    # eliminamos las tablas para las que el usuario no tiene permisos
+    for tb in DB_INFO[db_name_2].values():
+        if user_rol not in tb['accessed_by']:
+            tables_2.remove(tb['name'])
+            
+    db_data_2 = {}
+    
+    for table_name in tables_2:
+        cursor_2.execute(f"SHOW COLUMNS FROM {table_name}")
+        columns_info = cursor_2.fetchall()
+        columns = [column['Field'] for column in columns_info]
+        columns_except_id = [column for column in columns if column.lower() != 'id']
+        columns_str = ', '.join(columns_except_id)
+        sql_query = f"SELECT {columns_str} FROM {table_name}"
+        cursor_2.execute(sql_query)
+        records = cursor_2.fetchall()
+        # formateamos los registros antes de agregarlos al resultado final
+        formatted_records = [{key: format_datetime(value) for key, value in record.items()} for record in records]
+        table_data = {
+            "table_name": table_name,
+            "records": formatted_records
+        }
+        db_data_2[table_name] = table_data
         
-        # eliminamos las tablas para las que el usuario no tiene permisos
-        for tb in DB_INFO['POSTES'].values():
-            if user_rol not in tb['accessed_by']:
-                tables_2.remove(tb['name'])
-                
-        print(f"tabla 1: {tables_1}")
-        print(f"tabla 2: {tables_2}")
+    all_tables_data[db_name_2] = db_data_2
+    json_result = json.dumps(all_tables_data, default=str, indent=2)
+    
+    return json_result
 
-        all_tables_data_2 = {}
-
-        for table_name in tables_2:
-            cursor_2.execute(f"SHOW COLUMNS FROM {table_name}")
-            columns_info = cursor_2.fetchall()
-            columns = [column['Field'] for column in columns_info]
-
-            columns_except_id = [column for column in columns if column.lower() != 'id']
-            columns_str = ', '.join(columns_except_id)
-
-            sql_query = f"SELECT {columns_str} FROM {table_name}"
-            cursor_2.execute(sql_query)
-
-            records = cursor_2.fetchall()
-
-            # formateamos los registros antes de agregarlos al resultado final
-            formatted_records = [{key: format_datetime(value) for key, value in record.items()} for record in records]
-
-            table_data = {
-                "table_name": table_name,
-                "records": formatted_records
-            }
-
-            all_tables_data_2[table_name] = table_data
-
-        result = [all_tables_data_1, all_tables_data_2]
-
-        json_result = json.dumps(result, default=str, indent=2)
-
-        return json_result
-
-    except mysql.connector.Error as err:
-        print(f"Error: {err}")
-        return "{}"
-
-    finally:
-        cursor_1.close()
-        cursor_2.close()
+    cursor_1.close()
+    cursor_2.close()
 
 # función para actualizar un registro en una tabla por identificador
 def update_record_table_by_id(token: str, new_data_dict: dict, original_data_dict: dict, connection: mysql.connector.connection.MySQLConnection, identifier: str, view: str, secret_key: str) -> dict:
