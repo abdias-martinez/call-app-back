@@ -19,12 +19,13 @@ DB_INFO = {
     "CAE": {
         "users": {"name": "Usuarios", "accessed_by": ["administrador"]},
         "events": {"name": "Eventos", "accessed_by": ["administrador", "operador"]},
-    },
-    "POSTES": {
-        "states_reports_posts": {"name": "POSTES_REPORTES_ESTADO", "accessed_by": ["administrador", "operador"]},
-        "sms_posts": {"name": "POSTES_SMS", "accessed_by": []},
-        "event_sabre": {"name": "SABRE_EVENTO", "accessed_by": []}
-    },
+        "notifications": {"name": "Notificaciones", "accessed_by": ["administrador", "operador"]},
+        "events_options": {"name": "Opciones_Eventos", "accessed_by": ["administrador", "operador"]},
+        "post_register": {"name": "Registro_Poste", "accessed_by": ["administrador", "operador"]},
+        "post_actual_report": {"name": "Reporte_actual_postes", "accessed_by": ["administrador", "operador"]},
+        "calls_report": {"name": "Reporte_llamadas", "accessed_by": ["administrador", "operador"]},
+        "posts_report": {"name": "Reporte_postes", "accessed_by": ["administrador", "operador"]},
+    }
 }
 
 USER_ROLES = {"operador": {"admin": False}, "administrador": {"admin": True}}
