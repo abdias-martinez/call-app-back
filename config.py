@@ -5,14 +5,7 @@ DB_CONFIG = [
         "user": "cae",
         "password": "123456789",
         "database": "CAE",
-    },
-    {
-        "host": "34.66.90.121",
-        "port": "3306",
-        "user": "cae",
-        "password": "123456789",
-        "database": "POSTES",
-    },
+    }
 ]
 
 DB_INFO = {
