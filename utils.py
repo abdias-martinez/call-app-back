@@ -50,6 +50,10 @@ def insert_records_table(token: str, data_dict: dict, connection: mysql.connecto
                 # verificamos si el registro único ya existe en la tabla 'Tipos_Vehiculo'
                 if table_name == 'Tipos_Vehiculo' and check_existing_record(cursor, table_name, 'vehiculo', data_dict['vehiculo']):
                     return {'type': 'error', 'message': 'Vehículo ya existe'}
+                
+                # verificamos si el registro único ya existe en la tabla 'Tipos_Persona'
+                if table_name == 'Tipos_Persona' and check_existing_record(cursor, table_name, 'persona', data_dict['persona']):
+                    return {'type': 'error', 'message': 'Persona ya existe'}
 
                 columns = ', '.join(data_dict.keys())
                 placeholders = ', '.join(['%s'] * len(data_dict))
