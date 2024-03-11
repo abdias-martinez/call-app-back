@@ -10,6 +10,13 @@ def format_datetime(value):
         return value.strftime('%Y-%m-%d %H:%M:%S')
     else:
         return value
+    
+# función para verificar si un registro único ya existe   
+def check_existing_record(cursor: mysql.connector.cursor.MySQLCursor, table_name: str, field: str, value: str) -> bool:
+    query = f"SELECT COUNT(*) FROM {table_name} WHERE {field} = %s"
+    cursor.execute(query, (value,))
+    return cursor.fetchone()[0] > 0
+
 
 # función para insertar registros en una tabla
 def insert_records_table(token: str, data_dict: dict, connection: mysql.connector.connection.MySQLConnection, view: str, secret_key: str) -> dict:
@@ -24,13 +31,25 @@ def insert_records_table(token: str, data_dict: dict, connection: mysql.connecto
             try:
                 cursor = connection.cursor()
 
-                # verificamos si el usuario ya existe en la tabla 'Usuarios'
-                if table_name == 'Usuarios':
-                    existing_user_query = f"SELECT COUNT(*) FROM {table_name} WHERE Usuario = %s"
-                    cursor.execute(existing_user_query, (data_dict['Usuario'],))
-                    user_count = cursor.fetchone()[0]
-                    if user_count > 0:
-                        return {'type': 'error', 'message': 'Usuario ya existe'}
+                # verificamos si el registro único ya existe en la tabla 'Usuarios'
+                if table_name == 'Usuarios' and check_existing_record(cursor, table_name, 'Usuario', data_dict['Usuario']):
+                    return {'type': 'error', 'message': 'Usuario ya existe'}
+
+                # verificamos si el registro único ya existe en la tabla 'Registro_Poste'
+                if table_name == 'Registro_Poste' and check_existing_record(cursor, table_name, 'num_poste', data_dict['num_poste']):
+                    return {'type': 'error', 'message': 'Poste ya existe'}
+                
+                # verificamos si el registro único ya existe en la tabla 'Tipos_Evento'
+                if table_name == 'Tipos_Evento' and check_existing_record(cursor, table_name, 'evento', data_dict['evento']):
+                    return {'type': 'error', 'message': 'Evento ya existe'}
+                
+                # verificamos si el registro único ya existe en la tabla 'Tipos_Derivado'
+                if table_name == 'Tipos_Derivado' and check_existing_record(cursor, table_name, 'derivado', data_dict['derivado']):
+                    return {'type': 'error', 'message': 'Derivado ya existe'}
+                
+                # verificamos si el registro único ya existe en la tabla 'Tipos_Vehiculo'
+                if table_name == 'Tipos_Vehiculo' and check_existing_record(cursor, table_name, 'vehiculo', data_dict['vehiculo']):
+                    return {'type': 'error', 'message': 'Vehículo ya existe'}
 
                 columns = ', '.join(data_dict.keys())
                 placeholders = ', '.join(['%s'] * len(data_dict))
