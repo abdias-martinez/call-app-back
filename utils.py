@@ -92,7 +92,7 @@ def get_records_table(token: str, connection: mysql.connector.connection.MySQLCo
                 cursor.execute(f"SHOW COLUMNS FROM {table_name}")
                 columns = [column['Field'] for column in cursor.fetchall()]
                 columns_except_id = [column for column in columns if column.lower() != 'id']
-                columns_str = ', '.join(columns_except_id)
+                columns_str = ', '.join(columns)
 
                 # ejecutamos la consulta SQL para obtener registros
                 sql_query = f"SELECT {columns_str} FROM {table_name}"
@@ -140,7 +140,7 @@ def get_all_tables_records(token: str, connection_1: mysql.connector.connection.
         columns_info = cursor_1.fetchall()
         columns = [column['Field'] for column in columns_info]
         columns_except_id = [column for column in columns if column.lower() != 'id']
-        columns_str = ', '.join(columns_except_id)
+        columns_str = ', '.join(columns)
         sql_query = f"SELECT {columns_str} FROM {table_name}"
         cursor_1.execute(sql_query)
         records = cursor_1.fetchall()
@@ -174,6 +174,7 @@ def update_record_table_by_id(token: str, new_data_dict: dict, original_data_dic
             try:
                 cursor = connection.cursor()
 
+                new_data_dict.pop('Id', None)
                 # construimos la cláusula SET para la actualización
                 set_clause = ', '.join([f"{key} = %s" for key in new_data_dict.keys()])
                 where_condition = f"{identifier} = %s"
